@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #define N 3
+#define MaximoJogadas 9
+#define MinimoJogadas 5
+int tabuleiro[N][N];
 
 int menuInicial(){
     int escolha;
@@ -17,18 +20,17 @@ int menuInicial(){
     return escolha;
 }
 
-void iniciarTabuleiro(int tabuleiro[][N]){ // depois montar apresentação para o usuário
+void iniciarTabuleiro(){ // depois montar apresentação para o usuário
     int i, j;
     for (i=0;i<N;i++){
         for(j=0;j<N;j++){
             tabuleiro[i][j] =9;
-            printf("%d  ",tabuleiro[i][j]);
         }
-        printf("\n");
     }
 }
 
-void exibirTabuleiro(int tabuleiro[][N]){
+void exibirTabuleiro(int contadorJogadas){
+    printf("\nTabuleiro na jogada: %d\n",contadorJogadas);
     //system("clear");
     int i, j;
     for (i=0;i<N;i++){
@@ -37,9 +39,10 @@ void exibirTabuleiro(int tabuleiro[][N]){
         }
         printf("\n");
     }
+    
 }
 
-bool verificarDisponibilidade(int tabuleiro[][N], int linha, int coluna,int vez){
+bool verificarDisponibilidade(int linha, int coluna,int vez){
     if (tabuleiro[linha][coluna]==9){
         tabuleiro[linha][coluna]=vez;
           return true;
@@ -48,7 +51,7 @@ bool verificarDisponibilidade(int tabuleiro[][N], int linha, int coluna,int vez)
     return false;  
 }
 
-void jogadasDupla(int tabuleiro[][N],int vez){
+void jogadasUsuario(int vez){
     int linha, coluna;
     bool disponibilidade = false;
     
@@ -56,12 +59,12 @@ void jogadasDupla(int tabuleiro[][N],int vez){
         printf("Jogador %d entre linha e coluna\n",vez);
         scanf("%d",&linha);
         scanf("%d",&coluna);
-        disponibilidade = verificarDisponibilidade(tabuleiro,linha, coluna, vez);   
+        disponibilidade = verificarDisponibilidade(linha, coluna, vez);   
     }while(!disponibilidade);
 
 }
 
-bool verificarLinhas(int tabuleiro[][N], int vez){
+bool verificarLinhas(int vez){
     int i, j, somaL=0;
 
      for (i=0;i<N;i++){
@@ -77,7 +80,7 @@ bool verificarLinhas(int tabuleiro[][N], int vez){
     return false;
 }
 
-bool verificarColunas(int tabuleiro[][N], int vez){
+bool verificarColunas(int vez){
     int i, j, somaC=0;
 
      for (i=0;i<N;i++){
@@ -93,7 +96,7 @@ bool verificarColunas(int tabuleiro[][N], int vez){
     return false;
 }
 
-bool verificarDiagonais(int tabuleiro[][N], int vez){
+bool verificarDiagonais( int vez){
     
     if((tabuleiro[2][0]==vez) && (tabuleiro[1][1]==vez) && (tabuleiro[0][2]==vez))
         return true;
@@ -106,13 +109,13 @@ bool verificarDiagonais(int tabuleiro[][N], int vez){
 }
 
 
-bool verificarTrinca(int tabuleiro[][N], int vez){
+bool verificarTrinca(int vez){
 
-   if(verificarColunas(tabuleiro,vez))
+   if(verificarColunas(vez))
         return true;
-   if(verificarLinhas(tabuleiro,vez))
+   if(verificarLinhas(vez))
         return true;
-   if (verificarDiagonais(tabuleiro,vez))
+   if (verificarDiagonais(vez))
          return true;
     
 
@@ -120,47 +123,78 @@ bool verificarTrinca(int tabuleiro[][N], int vez){
    
 }
 
-void jogoEmDupla(int tabuleiro[][N],int contadorJogadas){
+void posicaoLivreAleatoria(int vez){
+    int i, j;
+
+    for (i=0;i<N;i++){
+        for(j=0;j<N;j++){
+            if (tabuleiro[i][j]==9){
+                tabuleiro[i][j]=vez;
+                printf("\nMarcador %d, inserido em (%d,%d)",vez,i,j);
+                return;
+            }
+        }
+    }
+
+}
+
+void jogadasComputador( int vez){
+    posicaoLivreAleatoria(vez);
+        
+}
+
+void jogo(int contadorJogadas, int tipoJogo){
     int vez=1;
     bool resultado;
     
-    while(contadorJogadas < 9){
-        jogadasDupla(tabuleiro,vez);
-        contadorJogadas++;
-        exibirTabuleiro(tabuleiro);
-        resultado = verificarTrinca(tabuleiro,vez);
-        if(resultado)
-            break;
-        vez == 1? vez-- : vez++;             
+    while(contadorJogadas < MaximoJogadas){
+
+        if(tipoJogo==1)
+        {
+            if(vez==1)
+                jogadasUsuario(vez);
+            else
+                jogadasComputador(vez);
+        }
+        else{
+            jogadasUsuario(vez);
+        }
+
+
+        vez == 1? vez-- : vez++;   
+        contadorJogadas++;     
+
+        exibirTabuleiro(contadorJogadas);   
+        
+        
+        if(contadorJogadas>=MinimoJogadas)
+        {
+            resultado = verificarTrinca(vez);
+            if(resultado)
+                break;
+        }
+
+             
     }    
 
     if (resultado)
         printf("Jogador %d ganhou",vez);
     else
-        printf("Empate");      
-    
-    
+        printf("Empate");
 
 }
-
 
 void main(){
     // apresentação
     int tipoJogo = menuInicial();
     
     //declarações e inicializações
-    int tabuleiro[N][N];
     int contadorJogadas = 0;    
-    iniciarTabuleiro(tabuleiro);
+    iniciarTabuleiro();
 
-    
-    switch (tipoJogo)
-    {
-        case 1: printf("\nJogo contra o computador");break;
-        case 2: jogoEmDupla(tabuleiro,contadorJogadas);break;
-    }   
-    
-    
+    //Jogo
+    jogo(contadorJogadas,tipoJogo);          
+   
 }
 
 
