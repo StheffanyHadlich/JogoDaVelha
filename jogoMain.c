@@ -26,12 +26,10 @@ void iniciarTabuleiro(int tabuleiro[][N]){ // depois montar apresentação para 
         }
         printf("\n");
     }
-
-    tabuleiro[0][2]=1;
 }
 
 void exibirTabuleiro(int tabuleiro[][N]){
-    system("cls");
+    //system("clear");
     int i, j;
     for (i=0;i<N;i++){
         for(j=0;j<N;j++){
@@ -55,7 +53,7 @@ void jogadasDupla(int tabuleiro[][N],int vez){
     bool disponibilidade = false;
     
     do{
-        printf("Entre linha e coluna\n");
+        printf("Jogador %d entre linha e coluna\n",vez);
         scanf("%d",&linha);
         scanf("%d",&coluna);
         disponibilidade = verificarDisponibilidade(tabuleiro,linha, coluna, vez);   
@@ -63,60 +61,85 @@ void jogadasDupla(int tabuleiro[][N],int vez){
 
 }
 
-bool verificarTrinca(int tabuleiro[][N], int resultado){
-    int i, j, somaL =0, somaC = 0, somaD = 0;
+bool verificarLinhas(int tabuleiro[][N], int vez){
+    int i, j, somaL=0;
 
-    //verifica trinca nas linhas e colunas
-    for (i=0;i<N;i++){
+     for (i=0;i<N;i++){
         for(j=0;j<N;j++){
-           //verifica linhas
-            switch(tabuleiro[i][j]){
-                case 1: somaL++;
-                case 0: somaL--;
-            } 
-            //verifica colunas
-            switch(tabuleiro[j][i]){
-                case 1: somaC++;
-                case 0: somaC--;
-            } 
-
+            if (tabuleiro[i][j]==vez)
+                somaL++;  
         }
-
-      if ((somaL ==3) || (somaL == -3) || (somaC ==3) || (somaC == -3))
-        return true;
-      
-      somaL = 0;
-      somaC = 0;
-      //verifica diagonal principal
-      switch(tabuleiro[j][j]){
-                case 1: somaD++;
-                case 0: somaD--;
-      }
-
-      if((somaD ==3) || (somaD == -3))
-        return true            
+        if (somaL == 3)
+            return true;
+        somaL = 0;
     }
 
-    //verifica diagonal secundária
-    if((tabuleiro[2][0]==1) && (tabuleiro[1][1]==1) && (tabuleiro[0][2]==1))
-        return true
-    if((tabuleiro[2][0]==0) && (tabuleiro[1][1]==0) && (tabuleiro[0][2]==0))
-        return true    
-
+    return false;
 }
 
-void jogoEmDupla(int tabuleiro[][N],contadorJogadas){
+bool verificarColunas(int tabuleiro[][N], int vez){
+    int i, j, somaC=0;
+
+     for (i=0;i<N;i++){
+        for(j=0;j<N;j++){
+            if (tabuleiro[j][i]==vez)
+                somaC++;  
+        }
+        if (somaC == 3)
+            return true;
+        somaC = 0;
+    }
+
+    return false;
+}
+
+bool verificarDiagonais(int tabuleiro[][N], int vez){
+    
+    if((tabuleiro[2][0]==vez) && (tabuleiro[1][1]==vez) && (tabuleiro[0][2]==vez))
+        return true;
+
+    if((tabuleiro[0][0]==vez) && (tabuleiro[1][1]==vez) && (tabuleiro[2][2]==vez))
+        return true;  
+
+    return false;
+      
+}
+
+
+bool verificarTrinca(int tabuleiro[][N], int vez){
+
+   if(verificarColunas(tabuleiro,vez))
+        return true;
+   if(verificarLinhas(tabuleiro,vez))
+        return true;
+   if (verificarDiagonais(tabuleiro,vez))
+         return true;
+    
+
+    return false;
+   
+}
+
+void jogoEmDupla(int tabuleiro[][N],int contadorJogadas){
     int vez=1;
     bool resultado;
     
-    while(!resultado && (contadorJogadas <= 9)){
+    while(contadorJogadas < 9){
         jogadasDupla(tabuleiro,vez);
         contadorJogadas++;
         exibirTabuleiro(tabuleiro);
-        verificarTrinca(tabuleiro, resultado);//implementar isso.
-        vez == 1? vez = 2 : vez:1;      
-        
+        resultado = verificarTrinca(tabuleiro,vez);
+        if(resultado)
+            break;
+        vez == 1? vez-- : vez++;             
     }    
+
+    if (resultado)
+        printf("Jogador %d ganhou",vez);
+    else
+        printf("Empate");      
+    
+    
 
 }
 
