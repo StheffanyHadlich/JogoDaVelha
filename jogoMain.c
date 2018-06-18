@@ -6,6 +6,7 @@
 #define MinimoJogadas 5
 int tabuleiro[N][N];
 
+
 int menuInicial(){
     int escolha;
     printf("JOGO DA VELHA\n");
@@ -30,8 +31,9 @@ void iniciarTabuleiro(){ // depois montar apresentação para o usuário
 }
 
 void exibirTabuleiro(int contadorJogadas){
-    printf("\nTabuleiro na jogada: %d\n",contadorJogadas);
     //system("clear");
+    printf("\nTabuleiro na jogada: %d\n",contadorJogadas);
+    
     int i, j;
     for (i=0;i<N;i++){
         for(j=0;j<N;j++){
@@ -55,7 +57,7 @@ void jogadasUsuario(int vez){
     bool disponibilidade = false;
     
     do{
-        printf("Jogador %d entre linha e coluna\n",vez);
+        printf("Jogador %d entre com nova linha e coluna\n",vez);
         scanf("%d",&linha);
         scanf("%d",&coluna);
         disponibilidade = verificarDisponibilidade(linha, coluna, vez);  
@@ -131,7 +133,6 @@ bool posicaoLivreAleatoria(int vez){
         for(j=0;j<N;j++){
             if (tabuleiro[i][j]==9){
                 tabuleiro[i][j]=vez;
-                printf("\nMarcador %d, inserido em (%d,%d)",vez,i,j);
                 return true;
             }
         }
@@ -141,14 +142,19 @@ bool posicaoLivreAleatoria(int vez){
 
 }
 
-bool colunaEstrategia(int b, int vez){
-    int i, soma = 0;
+bool colunaEstrategia(int b, int vez, int marcador){
+    int i, vazio = 0, x=0;
     for(i=0;i<N;i++){
-        if((tabuleiro[i][b]==9) || (tabuleiro[i][b]==vez))
-            soma++;
+        if(tabuleiro[i][b]==9)
+            vazio++;
+        if (tabuleiro[i][b]==marcador)
+            x++;
     }
-    printf("\nSoma Coluna: %d\n",soma);
-    if(soma==3){
+
+    if ((vez != marcador) && ((vazio==2)||(x==1)))
+        return false;
+
+    if(vazio+x==3){
         for(i=0;i<N;i++){
             if(verificarDisponibilidade(i,b,vez))
                 return true;
@@ -159,14 +165,19 @@ bool colunaEstrategia(int b, int vez){
     
 }
 
-bool linhaEstrategia(int a, int vez){
-    int i, soma = 0;
+bool linhaEstrategia(int a, int vez, int marcador){
+    int i, vazio = 0, x=0;
     for(i=0;i<N;i++){
-        if((tabuleiro[a][i]==9) || (tabuleiro[a][i]==vez))
-            soma++;
+        if(tabuleiro[a][i]==9)
+            vazio++;
+        if (tabuleiro[a][i]==marcador)
+            x++;
     }
 
-    if(soma==3){
+    if ((vez != marcador) && ((vazio==2)||(x==1)))
+        return false;
+
+    if(vazio+x==3){
         for(i=0;i<N;i++){
             if(verificarDisponibilidade(a,i,vez))
                 return true;
@@ -177,14 +188,19 @@ bool linhaEstrategia(int a, int vez){
     
 }
 
-bool diagonalPrincipalEstrategia(int vez){
-    int i, soma = 0;
+bool diagonalPrincipalEstrategia(int vez, int marcador){
+    int i, vazio = 0, x=0;
     for(i=0;i<N;i++){
-        if((tabuleiro[i][i]==9) || (tabuleiro[i][i]==vez))
-            soma++;
+        if(tabuleiro[i][i]==9)
+            vazio++;
+        if(tabuleiro[i][i]==marcador)
+            x++;
     }
 
-    if(soma==3){
+    if ((vez != marcador) && ((vazio==2)||(x==1)))
+        return false;
+
+    if(x+vazio==3){
         for(i=0;i<N;i++){
             if(verificarDisponibilidade(i,i,vez))
                 return true;
@@ -195,17 +211,24 @@ bool diagonalPrincipalEstrategia(int vez){
     
 }
 
-bool diagonalSecundariaEstrategia(int vez){
-    int i,j, soma = 0;
+bool diagonalSecundariaEstrategia(int vez, int marcador){
+    int i,j, vazio = 0, x=0;
+
     for(i=2;i>=0;i--){
         for(j=0;j<N;j++){
-            if((tabuleiro[i][j]==9) || (tabuleiro[i][j]==vez))
-                soma++;
+            if(tabuleiro[i][j]==9)
+                vazio++;
+            if(tabuleiro[i][j]==marcador)
+                x++;
+            
         }
         
     }
 
-    if(soma==3){
+    if ((vez != marcador) && ((vazio==2)||(x==1)))
+        return false;
+
+    if(vazio+x==3){
         for(i=2;i>=0;i--){
             for(j=0;j<N;j++){
                 if(verificarDisponibilidade(i,j,vez))
@@ -219,52 +242,59 @@ bool diagonalSecundariaEstrategia(int vez){
     
 }
 
-bool verificarVizinhos(int a, int b, int vez){ //testar todo esse método
+bool verificarVizinhos(int a, int b, int vez, int marcador){ //testar todo esse método
     int i;
 
     if(((a==2)&&(b==0))||((a==0)&&(b==2)) || (a==b)){
-        if(diagonalSecundariaEstrategia(vez))
-            return true;
+
+        if(((a==2)&&(b==0))||((a==0)&&(b==2))||(a==1)){
+            if(diagonalSecundariaEstrategia(vez, marcador))
+                return true;
+        }        
 
         if(a==b) {
-            if(diagonalPrincipalEstrategia(vez))
+            if(diagonalPrincipalEstrategia(vez,marcador))
                 return true;
         }
        
     }    
 
-    if(linhaEstrategia(a,vez))
+    if(linhaEstrategia(a,vez, marcador))
         return true;
 
-    if(colunaEstrategia(b,vez))
+    if(colunaEstrategia(b,vez, marcador))
         return true;
     
     return false;
 }
 
-bool estrategia1(int vez){
+bool estrategia(int vez, int marcador){ // computador detecta possíveis trincas
     int i, j;
 
     for (i=0;i<N;i++){
         for(j=0;j<N;j++){
-            if (tabuleiro[i][j] == vez){
-                if (verificarVizinhos(i,j,vez))
+            if (tabuleiro[i][j] == marcador){
+                if (verificarVizinhos(i,j,vez, marcador))
                     return true;
             }
         }
     }
-    
     return false;
 
 }
 
 void jogadasComputador( int vez){
+    int adversario = vez;
 
-    if (estrategia1(vez))
+    vez == 0 ? adversario++ : adversario--;
+
+
+    //if (estrategia(vez, adversario)) // tenta impedir
+      //  return;
+
+    if (estrategia(vez,vez)) // Tenta formular uma trinca
         return;
-
-    //estratégia 2 - bloquear adversário
-
+    
     if (posicaoLivreAleatoria(vez))
         return;
         
