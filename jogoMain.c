@@ -47,7 +47,6 @@ bool verificarDisponibilidade(int linha, int coluna,int vez){
         tabuleiro[linha][coluna]=vez;
           return true;
     }
-    printf("Posicao invalida\n");
     return false;  
 }
 
@@ -59,7 +58,9 @@ void jogadasUsuario(int vez){
         printf("Jogador %d entre linha e coluna\n",vez);
         scanf("%d",&linha);
         scanf("%d",&coluna);
-        disponibilidade = verificarDisponibilidade(linha, coluna, vez);   
+        disponibilidade = verificarDisponibilidade(linha, coluna, vez);  
+        if(disponibilidade==false)
+            printf("Posicao invalida\n"); 
     }while(!disponibilidade);
 
 }
@@ -123,7 +124,7 @@ bool verificarTrinca(int vez){
    
 }
 
-void posicaoLivreAleatoria(int vez){
+bool posicaoLivreAleatoria(int vez){
     int i, j;
 
     for (i=0;i<N;i++){
@@ -131,15 +132,141 @@ void posicaoLivreAleatoria(int vez){
             if (tabuleiro[i][j]==9){
                 tabuleiro[i][j]=vez;
                 printf("\nMarcador %d, inserido em (%d,%d)",vez,i,j);
-                return;
+                return true;
             }
         }
     }
 
+    return false;
+
+}
+
+bool colunaEstrategia(int b, int vez){
+    int i, soma = 0;
+    for(i=0;i<N;i++){
+        if((tabuleiro[i][b]==9) || (tabuleiro[i][b]==vez))
+            soma++;
+    }
+    printf("\nSoma Coluna: %d\n",soma);
+    if(soma==3){
+        for(i=0;i<N;i++){
+            if(verificarDisponibilidade(i,b,vez))
+                return true;
+        }
+    }
+        
+    return false;
+    
+}
+
+bool linhaEstrategia(int a, int vez){
+    int i, soma = 0;
+    for(i=0;i<N;i++){
+        if((tabuleiro[a][i]==9) || (tabuleiro[a][i]==vez))
+            soma++;
+    }
+
+    if(soma==3){
+        for(i=0;i<N;i++){
+            if(verificarDisponibilidade(a,i,vez))
+                return true;
+        }
+    }
+        
+    return false;
+    
+}
+
+bool diagonalPrincipalEstrategia(int vez){
+    int i, soma = 0;
+    for(i=0;i<N;i++){
+        if((tabuleiro[i][i]==9) || (tabuleiro[i][i]==vez))
+            soma++;
+    }
+
+    if(soma==3){
+        for(i=0;i<N;i++){
+            if(verificarDisponibilidade(i,i,vez))
+                return true;
+        }
+    }
+        
+    return false;
+    
+}
+
+bool diagonalSecundariaEstrategia(int vez){
+    int i,j, soma = 0;
+    for(i=2;i>=0;i--){
+        for(j=0;j<N;j++){
+            if((tabuleiro[i][j]==9) || (tabuleiro[i][j]==vez))
+                soma++;
+        }
+        
+    }
+
+    if(soma==3){
+        for(i=2;i>=0;i--){
+            for(j=0;j<N;j++){
+                if(verificarDisponibilidade(i,j,vez))
+                    return true;
+            }
+        
+        }
+    }
+        
+    return false;
+    
+}
+
+bool verificarVizinhos(int a, int b, int vez){ //testar todo esse método
+    int i;
+
+    if(((a==2)&&(b==0))||((a==0)&&(b==2)) || (a==b)){
+        if(diagonalSecundariaEstrategia(vez))
+            return true;
+
+        if(a==b) {
+            if(diagonalPrincipalEstrategia(vez))
+                return true;
+        }
+       
+    }    
+
+    if(linhaEstrategia(a,vez))
+        return true;
+
+    if(colunaEstrategia(b,vez))
+        return true;
+    
+    return false;
+}
+
+bool estrategia1(int vez){
+    int i, j;
+
+    for (i=0;i<N;i++){
+        for(j=0;j<N;j++){
+            if (tabuleiro[i][j] == vez){
+                if (verificarVizinhos(i,j,vez))
+                    return true;
+            }
+        }
+    }
+    
+    return false;
+
 }
 
 void jogadasComputador( int vez){
-    posicaoLivreAleatoria(vez);
+
+    if (estrategia1(vez))
+        return;
+
+    //estratégia 2 - bloquear adversário
+
+    if (posicaoLivreAleatoria(vez))
+        return;
         
 }
 
@@ -159,9 +286,7 @@ void jogo(int contadorJogadas, int tipoJogo){
         else{
             jogadasUsuario(vez);
         }
-
-
-        vez == 1? vez-- : vez++;   
+   
         contadorJogadas++;     
 
         exibirTabuleiro(contadorJogadas);   
@@ -170,16 +295,18 @@ void jogo(int contadorJogadas, int tipoJogo){
         if(contadorJogadas>=MinimoJogadas)
         {
             resultado = verificarTrinca(vez);
-            if(resultado)
+            if(resultado){
+                printf("Jogador %d ganhou",vez);
                 break;
+            }
         }
+
+        vez == 1? vez-- : vez++;
 
              
     }    
 
-    if (resultado)
-        printf("Jogador %d ganhou",vez);
-    else
+    if(!resultado)
         printf("Empate");
 
 }
