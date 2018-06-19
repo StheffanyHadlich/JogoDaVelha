@@ -10,5 +10,7 @@
 
 * Replay ✅
 
+Compilação: gcc jogoMain.c biblioteca.c -o jogo 
+
 
 

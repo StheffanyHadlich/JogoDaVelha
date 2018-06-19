@@ -217,7 +217,7 @@ bool colunaEstrategia(int b, int vez, int marcador){
 
     if ((vez != marcador) && ((vazio==2)||(x==1)))
         return false;
-
+    
     if(vazio+x==3){
         for(i=0;i<N;i++){
             if(verificarDisponibilidade(i,b,vez))
