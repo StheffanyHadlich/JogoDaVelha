@@ -7,9 +7,9 @@
     - nível menos fácil ✅
     - nível impossível (eu acho) ✅
 
-* Menu e visualização
+* Menu e visualização (ainda ta meio bugada)
 
-* Replay
+* Replay (em construção)
 
 
 
