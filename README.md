@@ -4,8 +4,7 @@
 
 * Jogo solo (contra o computador) 
     - nível fácil ✅
-    - nível menos fácil ✅
-    - nível impossível (eu acho) ✅
+    - nível difícil ✅
 
 * Menu e visualização (ainda ta meio bugada)
 
