@@ -1,52 +1,119 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+
 #define N 3
 #define MaximoJogadas 9
 #define MinimoJogadas 5
 int tabuleiro[N][N];
+int tabuleiroExibido[N][N];
+int replayLinhas[MaximoJogadas];
+int replayColunas[MaximoJogadas];
+int jogos=0;
 
-
-int menuInicial(){
-    int escolha;
-    printf("JOGO DA VELHA\n");
-    printf("Pressione 1 para jogar contra o computador ou 2 para jogar em dupla: ");
-    scanf("%d",&escolha); 
-
-    while ((escolha != 1) && (escolha != 2)){
-        printf("Entre com uma opção válida. Pressione 1 para jogar contra o computador ou 2 para jogar em dupla: ");
-        scanf("%d",&escolha);
-    } 
-
-    return escolha;
-}
-
-void iniciarTabuleiro(){ // depois montar apresentação para o usuário
+void iniciarTabuleiro(){ 
     int i, j;
     for (i=0;i<N;i++){
         for(j=0;j<N;j++){
             tabuleiro[i][j] =9;
+            tabuleiroExibido[i][j]=95;
+        }
+    }
+
+    for(i=0;i<MaximoJogadas;i++){
+        replayLinhas[i]=0;
+        replayColunas[i]=0;
+    }       
+}
+
+void salvarReplay(int linha, int coluna){
+    int i;
+    for(i=0;i<MaximoJogadas;i++){
+        if(replayLinhas[i]==0){
+            replayLinhas[i]=linha;
+            replayColunas[i]=coluna;
+            return;
         }
     }
 }
 
+void replay(){
+    if(jogos==0){
+        printf("\nNenhum jogo foi realizado ainda");
+        return;
+    }
+
+    int i,j,replay[N][N];
+    int icone = 120;
+
+    for(i=0;i<N;i++){
+        for(j=0;j<N;j++){
+            replay[i][j]=95;
+        }
+    }
+
+    for(i=0;i<MaximoJogadas;i++){
+        replay[replayLinhas[i]][replayColunas[i]]=icone;
+        if(icone==120)
+            icone=111;
+    }
+
+    printf("\nReplay do último jogo\n");
+    for(i=0;i<N;i++){
+        for(j=0;j<N;j++){
+            printf("%c  ",replay[i][j]);
+        }
+        printf("\n");
+    }
+
+
+}
+
 void exibirTabuleiro(int contadorJogadas){
-    //system("clear");
-    printf("\nTabuleiro na jogada: %d\n",contadorJogadas);
-    
+    //system("clear");    
+    printf("\nJogada: %d\n",contadorJogadas);
     int i, j;
     for (i=0;i<N;i++){
         for(j=0;j<N;j++){
-            printf("%d  ",tabuleiro[i][j]);
+            printf("%c  ",tabuleiroExibido[i][j]);
         }
         printf("\n");
     }
     
 }
 
+void mensagens(int etapa){
+    //system("clear");
+    printf("*** JOGO DA VELHA ****\n\n");
+
+    if(etapa==0){
+        printf("1 Iniciar novo Jogo\n2 Ver replay do ultimo jogo\n3 Sair\n");
+    }
+    
+    if(etapa ==1){
+        printf("Escolha o tipo de jogo:\n1 para jogar contra o computador \n2 para jogar em dupla\n\n");
+    }
+
+    if(etapa==2)
+        printf("Entre com uma opção válida, pressione: \n1 para jogar contra o computador\n2 para jogar em dupla\n\n");
+
+    if(etapa ==3)
+        printf("Escolha o modo de jogo:\n1 Fácil\n2 Difícil\n\n");
+    
+    
+  
+}
+
 bool verificarDisponibilidade(int linha, int coluna,int vez){
+    int icone=120;
+
+    if(vez==0)
+        icone=111;
+
     if (tabuleiro[linha][coluna]==9){
         tabuleiro[linha][coluna]=vez;
+        tabuleiroExibido[linha][coluna]=icone;
+        salvarReplay(linha,coluna);
           return true;
     }
     return false;  
@@ -57,7 +124,7 @@ void jogadasUsuario(int vez){
     bool disponibilidade = false;
     
     do{
-        printf("Jogador %d entre com nova linha e coluna\n",vez);
+        printf("\nJogador %d entre com nova linha e coluna\n",vez);
         scanf("%d",&linha);
         scanf("%d",&coluna);
         disponibilidade = verificarDisponibilidade(linha, coluna, vez);  
@@ -127,12 +194,17 @@ bool verificarTrinca(int vez){
 }
 
 bool posicaoLivreAleatoria(int vez){
-    int i, j;
+    int i, j, icone=120;
+
+    if(vez==0)
+        icone=111;
 
     for (i=0;i<N;i++){
         for(j=0;j<N;j++){
             if (tabuleiro[i][j]==9){
                 tabuleiro[i][j]=vez;
+                tabuleiroExibido[i][j]=icone;
+                salvarReplay(i,j);
                 return true;
             }
         }
@@ -283,14 +355,15 @@ bool estrategia(int vez, int marcador){ // computador detecta possíveis trincas
 
 }
 
-void jogadasComputador( int vez){
+void jogadasComputador( int vez, int nivel){
     int adversario = vez;
 
     vez == 0 ? adversario++ : adversario--;
 
-
-    //if (estrategia(vez, adversario)) // tenta impedir
-      //  return;
+    if (nivel == 2){
+        if (estrategia(vez, adversario)) // tenta impedir
+            return;
+    }  
 
     if (estrategia(vez,vez)) // Tenta formular uma trinca
         return;
@@ -301,8 +374,13 @@ void jogadasComputador( int vez){
 }
 
 void jogo(int contadorJogadas, int tipoJogo){
-    int vez=1;
+    int nivel,vez=1;
     bool resultado;
+
+    if (tipoJogo ==1){
+        mensagens(3);
+        scanf("%d",&nivel);
+    }
     
     while(contadorJogadas < MaximoJogadas){
 
@@ -311,7 +389,7 @@ void jogo(int contadorJogadas, int tipoJogo){
             if(vez==1)
                 jogadasUsuario(vez);
             else
-                jogadasComputador(vez);
+                jogadasComputador(vez,nivel);
         }
         else{
             jogadasUsuario(vez);
@@ -319,14 +397,15 @@ void jogo(int contadorJogadas, int tipoJogo){
    
         contadorJogadas++;     
 
-        exibirTabuleiro(contadorJogadas);   
+        //system("clear");
+        exibirTabuleiro(contadorJogadas);       
         
         
         if(contadorJogadas>=MinimoJogadas)
         {
             resultado = verificarTrinca(vez);
             if(resultado){
-                printf("Jogador %d ganhou",vez);
+                printf("\nResultado: Jogador %d ganhou\n",vez);
                 break;
             }
         }
@@ -337,20 +416,43 @@ void jogo(int contadorJogadas, int tipoJogo){
     }    
 
     if(!resultado)
-        printf("Empate");
+        printf("\nResultado: Empate");
 
 }
 
-void main(){
-    // apresentação
-    int tipoJogo = menuInicial();
-    
-    //declarações e inicializações
-    int contadorJogadas = 0;    
-    iniciarTabuleiro();
 
-    //Jogo
-    jogo(contadorJogadas,tipoJogo);          
+
+void main(){
+    // inicializaçoes
+
+    int escolha, contadorJogadas;        
+    // apresentação
+
+    for(;;){
+        
+        mensagens(0);
+        scanf("%d",&escolha); 
+
+        switch(escolha){
+            case 1: // Iniciar novo jogo
+                jogos++;
+                iniciarTabuleiro();
+                contadorJogadas=0;
+                mensagens(1);
+                scanf("%d",&escolha); 
+                while ((escolha!= 1) && (escolha != 2)){
+                    mensagens(2);
+                    scanf("%d",&escolha);
+                }
+                jogo(contadorJogadas,escolha); 
+                break;
+                
+            case 2: replay(); break; // Replay
+
+            case 3:  exit(1); break; //Sair
+        } 
+        
+    }
    
 }
 
