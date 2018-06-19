@@ -6,9 +6,9 @@
     - nível fácil ✅
     - nível difícil ✅
 
-* Menu e visualização (ainda ta meio bugada)
+* Menu e visualização ✅
 
-* Replay (em construção)
+* Replay ✅
 
 
 
